@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#191919" media="(prefers-color-scheme: dark)">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="수도권 남부 지도">
+  <title>수도권 남부 맞춤 찾기 · 개발·청약 지도</title>
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#panel">목록으로 바로가기</a>
+  <header class="topbar" id="topbar">
+    <div class="title-row">
+      <h1><span class="only-wide">수도권 남부 맞춤 찾기 · 개발·청약 지도</span><span class="only-narrow">수도권 남부 지도</span></h1>
+      <p class="asof" id="asof"></p>
+      <div class="title-actions">
+        <a class="btn" id="btn-stocks" href="stocks.html"><span class="only-wide">주식 신호</span><span class="only-narrow">주식</span></a>
+        <details class="settings" id="settings">
+          <summary class="btn"><span class="only-wide">세부 설정</span><span class="only-narrow">설정</span></summary>
+          <div class="settings-body" role="group" aria-label="세부 설정">
+            <div class="settings-head">
+              <strong>세부 설정</strong>
+              <button type="button" class="btn btn-ghost" id="btn-settings-close">닫기</button>
+            </div>
+            <form class="set-row search" id="search-form" role="search">
+              <label class="set-label" for="search-input">시군구 찾기</label>
+              <div class="search-line">
+                <input id="search-input" list="search-list" type="search" placeholder="예: 분당구, 과천시" autocomplete="off">
+                <datalist id="search-list"></datalist>
+                <button type="submit" class="btn">이동</button>
+              </div>
+            </form>
+            <div class="set-row">
+              <label class="set-label" for="choro-select">시군구 바탕 색칠</label>
+              <select id="choro-select">
+                <option value="mode">이 화면 기본값</option>
+                <option value="metric">가격·변동률 지표 (아래에서 선택)</option>
+                <option value="none">색칠 안 함</option>
+              </select>
+            </div>
+            <div class="set-row">
+              <label class="set-label" for="metric-select">가격·변동률 지표 (KB부동산·한국부동산원)</label>
+              <select id="metric-select"></select>
+            </div>
+            <fieldset class="set-row toggles">
+              <legend class="set-label">지도에 보일 것</legend>
+              <label class="toggle"><input type="checkbox" id="tg-dev"> 개발 항목</label>
+              <label class="toggle"><input type="checkbox" id="tg-rail"> 철도 노선</label>
+              <label class="toggle"><input type="checkbox" id="tg-cheongyak"> 청약 공고</label>
+              <label class="toggle"><input type="checkbox" id="tg-supply"> 앞으로 공급 예정</label>
+              <label class="toggle"><input type="checkbox" id="tg-areas"> 추천 지역</label>
+              <label class="toggle"><input type="checkbox" id="tg-complexes"> 추천 단지</label>
+              <label class="toggle"><input type="checkbox" id="tg-entries"> 입주권·조합원 물건</label>
+              <label class="toggle"><input type="checkbox" id="tg-regulation"> 규제지역 경계</label>
+              <label class="toggle"><input type="checkbox" id="tg-labels"> 시군구 이름</label>
+              <label class="toggle"><input type="checkbox" id="tg-south"> 한강 이남·경기 남부만 강조</label>
+              <label class="toggle"><input type="checkbox" id="tg-basemap"> 배경지도 (OpenStreetMap)</label>
+            </fieldset>
+            <p class="set-note" id="basemap-note"></p>
+            <p class="set-note">화면(탭)을 바꾸면 이 설정은 그 화면의 기본값으로 돌아갑니다.</p>
+          </div>
+        </details>
+        <button type="button" class="btn btn-ghost" id="btn-info" aria-haspopup="dialog"><span class="only-wide">데이터 안내</span><span class="only-narrow">안내</span></button>
+      </div>
+    </div>
+    <p class="howto" id="howto"></p>
+    <nav class="modebar" aria-label="화면 고르기">
+      <div class="modes" role="tablist" id="modes">
+        <button type="button" role="tab" class="mode" id="mode-buy" data-mode="buy" aria-controls="panel">맞춤 찾기</button>
+        <button type="button" role="tab" class="mode" id="mode-dev" data-mode="dev" aria-controls="panel">개발 지도</button>
+        <button type="button" role="tab" class="mode" id="mode-cy" data-mode="cy" aria-controls="panel">청약 지도</button>
+      </div>
+    </nav>
+    <p class="mode-hint" id="mode-hint" aria-live="polite"></p>
+  </header>
+
+  <main class="layout" id="layout">
+    <section class="map-wrap" id="map-wrap" aria-label="지도">
+      <div id="map" role="region" aria-label="서울·경기·인천 시군구 지도. 같은 내용은 목록에서도 볼 수 있습니다."></div>
+      <div class="legend-scrim" id="legend-scrim" hidden></div>
+      <div class="legend" id="legend" aria-live="polite"></div>
+    </section>
+    <aside class="panel" id="panel" tabindex="-1" aria-label="목록과 상세 정보">
+      <button type="button" class="sheet-handle" id="sheet-handle" aria-controls="panel-body" aria-expanded="true">
+        <span class="grabber" aria-hidden="true"></span>
+        <span class="sheet-title" id="sheet-title"></span>
+        <span class="sr-only" id="sheet-state"></span>
+      </button>
+      <div class="panel-body" id="panel-body"></div>
+    </aside>
+  </main>
+
+  <dialog id="info-dialog" aria-labelledby="info-title">
+    <div class="dialog-head">
+      <h2 id="info-title">데이터 안내</h2>
+      <button type="button" class="btn btn-ghost" id="btn-info-close">닫기</button>
+    </div>
+    <div class="dialog-body" id="info-body"></div>
+  </dialog>
+
+  <noscript><p class="noscript">이 지도는 자바스크립트가 필요합니다.</p></noscript>
+
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="data/districts.js"></script>
+  <script src="data/rail.js"></script>
+  <script src="data/cheongyak.js"></script>
+  <script src="data/areas.js"></script>
+  <script src="data/complexes.js"></script>
+  <script src="data/development.js"></script>
+  <script src="data/complex_scores.js"></script>
+  <script src="data/policy_rules.js"></script>
+  <script src="cy.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#191919" media="(prefers-color-scheme: dark)">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="주식 신호">
+  <title>주식 신호 · 지정가 매수·매도 기준</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="stocks.css">
+</head>
+<body class="sx">
+  <a class="skip-link" href="#sx-main">본문으로 바로가기</a>
+  <header class="topbar" id="topbar">
+    <div class="title-row">
+      <a class="btn btn-ghost sx-back" href="index.html"><span aria-hidden="true">←</span><span class="only-wide">아파트 지도</span><span class="only-narrow">지도</span></a>
+      <h1>주식 신호</h1>
+      <p class="asof" id="sx-asof"></p>
+      <div class="title-actions">
+        <button type="button" class="btn btn-ghost" id="sx-btn-rules" aria-haspopup="dialog" hidden><span class="only-wide">규칙 설명</span><span class="only-narrow">규칙</span></button>
+        <button type="button" class="btn btn-ghost" id="sx-btn-lock" hidden>잠그기</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="sx-main" id="sx-main" tabindex="-1">
+    <div class="sx-wrap" id="sx-root" aria-live="polite"></div>
+  </main>
+
+  <dialog id="sx-rules" aria-labelledby="sx-rules-title">
+    <div class="dialog-head">
+      <h2 id="sx-rules-title">이 페이지의 규칙</h2>
+      <button type="button" class="btn btn-ghost" id="sx-rules-close">닫기</button>
+    </div>
+    <div class="dialog-body" id="sx-rules-body"></div>
+  </dialog>
+
+  <noscript><p class="noscript">이 페이지는 자바스크립트가 필요합니다.</p></noscript>
+
+  <script src="vendor/lightweight-charts/lightweight-charts.standalone.production.js"></script>
+  <!-- data and page code are encrypted; stocks-lock.js asks for the password and runs them -->
+  <script src="data/stocks.enc.js"></script>
+  <script src="data/stocks.app.enc.js"></script>
+  <script src="stocks-lock.js"></script>
+</body>
+</html>
